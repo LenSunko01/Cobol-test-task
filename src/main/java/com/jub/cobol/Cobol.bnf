@@ -1,0 +1,42 @@
+{
+  parserClass="com.jub.cobol.parser.CobolParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Cobol"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.jub.cobol.psi"
+  psiImplPackage="com.jub.cobol.psi.impl"
+
+  elementTypeHolderClass="com.jub.cobol.psi.CobolTypes"
+  elementTypeClass="com.jub.cobol.psi.CobolElementType"
+  tokenTypeClass="com.jub.cobol.psi.CobolTokenType"
+}
+
+cobolSourceProgram ::= LINE-NUMBER IDENTIFICATION DIVISION DOT
+                       lineStart programId
+                       [lineStart DATA DIVISION DOT dataDivisionContent ]
+                       [lineStart procedureDivision]
+                       {newlines}*
+programId ::= COBOL-PROGRAM-ID [ DOT ] ALPHABETIC-USER-DEFINED-WORD [ DOT ]
+dataDivisionContent ::= [lineStart WORKING-STORAGE SECTION DOT { dataDescriptionEntry }* ]
+dataDescriptionEntry ::= lineStart LINE-NUMBER [ ( ALPHABETIC-USER-DEFINED-WORD | FILLER ) ] dataDescriptionEntryClauses DOT
+dataDescriptionEntryClauses ::= (pictureClause [ dataValueClause ] | [ dataValueClause ] pictureClause)
+pictureClause ::= PIC pictureString
+pictureString ::= CURRENCY? (PICCHAR+ REPEAT?)+ (PUNCTUATION (PICCHAR+ REPEAT?)+)*
+dataValueClause ::=	VALUE NUMERIC
+procedureDivision ::= PROCEDURE DIVISION DOT sections
+sections ::= paragraphs
+paragraphs ::= {sentence}* {paragraph}*
+paragraph ::= lineStart ALPHABETIC-USER-DEFINED-WORD DOT {sentence}*
+sentence ::= statement-list DOT
+statement-list ::= {statement}+
+statement ::= (performStatement | stopStatement | displayStatement)
+displayStatement ::= lineStart DISPLAY { ( NONNUMERIC | ALPHABETIC-USER-DEFINED-WORD ) }+
+stopStatement ::= lineStart STOPRUN
+performStatement ::= lineStart PERFORM (ALPHABETIC-USER-DEFINED-WORD performVaryingPhrase)
+performVaryingPhrase ::= VARYING ALPHABETIC-USER-DEFINED-WORD FROM NUMERIC BY NUMERIC UNTIL relationCondition
+relationCondition ::= basis EQUAL_SYMBOL basis
+basis ::= (NUMERIC | ALPHABETIC-USER-DEFINED-WORD)
+lineStart ::= NEWLINE LINE-NUMBER
+newlines ::= {NEWLINE}+
